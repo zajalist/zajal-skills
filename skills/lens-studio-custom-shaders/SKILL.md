@@ -99,6 +99,27 @@ and an `@input` settings struct of sliders; on update it pushes each slider into
   material for different effects (we overwrote one ocean node's file to fix rim masking — no
   re-wiring).
 
+## ⚠️ Don't reuse a custom-code graph material on a SECOND mesh — clone or isolate
+
+Assigning the **same** custom-code (e.g. LiquidGlass) material to a freshly-created plane **recompiled
+and corrupted the shared shader, and the effect VANISHED on every instance** — with **no error
+logged**. The graph material is effectively a singleton; pointing a new RenderMeshVisual at it can
+re-trigger compilation in a way that breaks the original. You won't see it in logs; you'll see it as a
+suddenly-blank glass card.
+
+If you just want another panel/glass surface on a new mesh, **don't share the custom-code material** —
+build an **isolated, non-graph material** that cannot touch the shared shader:
+
+- Create an **Image material** (`ImageMaterialPreset`) with a **baked PNG** texture — draw a
+  rounded-rect alpha + glow rim with PowerShell `System.Drawing` (see
+  [ui-building](../lens-studio-ui-building/SKILL.md), [assets-and-fbx](../lens-studio-assets-and-fbx/SKILL.md)).
+  This gives a controllable glass/panel look with zero risk to the shared graph shader.
+- Set its texture via the visual's `mainMaterial.passInfos.0.baseTex` (reference).
+- Set `blendShapesEnabled = false` on the new plane's `RenderMeshVisual` (a vanilla plane has no
+  blendshapes; leaving it on can cause spurious warnings/cost).
+
+Reserve the precious wired graph material for the single surface it was authored for.
+
 ## Workflow checklist
 
 1. Create/locate the graph material; add a Custom Code node in the GUI; wire its `output_` → Pixel

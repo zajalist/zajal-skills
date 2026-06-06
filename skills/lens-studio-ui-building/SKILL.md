@@ -88,6 +88,27 @@ hot-reloads it.
 - The editor **Preview** camera reframes as scene content changes (e.g. disabling a big sibling). The
   UI itself is fine; just re-crop screenshots. Verify look in the Preview panel, not the Scene panel.
 
+## Billboard speech bubble over a target
+
+A floating "speech bubble" that labels a mascot/object and stays readable from any angle is a small
+world-space Text driven by an `UpdateEvent` script. The durable shape:
+
+- **Billboard to the camera, yaw-locked.** Each frame point the bubble at the camera with
+  `quat.lookAt(dirToCamera, up)` — but **zero the pitch/roll** (build the look direction from the
+  camera position with `y` flattened) so the text stays upright instead of tilting when you look up or
+  down. Pure billboarding (full lookAt) makes labels lie back and get hard to read.
+- **Float above the target.** Position it at the target's world position + a fixed up offset; follow
+  the target each frame so it tracks if the target moves.
+- **Word-wrap + auto-shrink to a bounded panel.** Word-wrap the text, then shrink the font `size`
+  ([sizing is ~30–90](#text-sizing-is-3090-not-centimeters)) until the wrapped block fits a fixed
+  panel width/height — so long answers don't blow past the bubble.
+- **Grow upward from a fixed bottom edge.** Anchor the bubble's bottom just above the target and let it
+  expand up as text gets taller, so it **never overlaps the target mesh** (growing from the center
+  would push the bubble down onto the mascot's face).
+
+Give the text the [white-fill + dark-outline caption treatment](#readable-labels-over-busytranslucent-backgrounds)
+so it reads over the world, and a textured rounded-rect plane behind it for the bubble body.
+
 ## UI Kit widgets (when you want them)
 
 Instantiate prefabs (`LabelledButton`, `LabelledToggle`, `FramePrefab`, `ScrollViewListItem`) via

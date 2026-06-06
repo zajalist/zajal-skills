@@ -41,10 +41,13 @@ broken import (e.g. a duplicated `SpectaclesUIKit 2.lspkg`) floods the log. Cons
 
 ## Checking that TypeScript compiled
 
-- `CompileWithLogsTool` also **times out** when a bad import floods logs — don't lean on it.
-- Instead read just the `tsc` category, tiny window:
+- `CompileWithLogsTool` also **times out** when a bad import floods logs — don't lean on it. Worse, it
+  frequently **reports a timeout even though the TypeScript compile actually SUCCEEDED**. A timeout
+  error from it is not a compile failure — don't act on it.
+- Verify the compile from the **logs**, not the tool's exit. Read just the `tsc` category, tiny window:
   `GetLensStudioLogsTool categories:["tsc"] maxLines:25 timeWindowMs:15000`.
-  **An empty `tsc` result = no TypeScript errors** (it compiled clean). Errors show up here as text.
+  - **`"TypeScript compilation succeeded!"` in `tsc` = it compiled** (trust this over the tool timeout).
+  - **An empty `tsc` result = no TypeScript errors** either. Errors show up here as text.
 - If a new script's `@input`s never appear on its component, it didn't compile — check `tsc`.
 
 ## Screenshotting the preview

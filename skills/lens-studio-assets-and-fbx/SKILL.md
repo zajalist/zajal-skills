@@ -32,6 +32,23 @@ watcher picks it up.
 - Colors on materials still follow the component-by-component rule
   ([mcp-editing](../lens-studio-mcp-editing/SKILL.md)): `...baseColor.x/.y/.z` as `number`.
 
+## Fluffy / fur / cloth look: UberPBR + a CC0 fur texture (not the hair presets)
+
+To make an ordinary mesh read as fluffy/furry, the reliable route is **PBR + a real fur texture**, not
+the built-in hair shaders:
+
+1. Create an `UberPBRMaterialPreset` material; assign it to the mesh's visual.
+2. Set `mainMaterial.passInfos.0.baseTex` **and** `...normalTex` to a tiling **CC0 fur texture** —
+   Poly Haven (polyhaven.com) is the easy source; e.g. `curly_teddy_natural` gives a `diff` (→ baseTex)
+   and a `nor_gl` (→ normalTex) map, downloadable from `https://dl.polyhaven.org/...`. The normal map
+   does most of the "fuzz".
+3. High **roughness**, **metallic = 0**, and tint via `baseColor` (component-by-component —
+   [mcp-editing](../lens-studio-mcp-editing/SKILL.md)).
+
+**Avoid the built-in hair presets** (`HairGlowingOrange`, `HairCurlyBlue`, …) for this: they expect
+groom/strand geometry with hair UVs and look wrong stretched across an arbitrary solid mesh. They're
+for actual hair cards, not "make this blob fluffy." Prefer the PBR-fur approach on ordinary meshes.
+
 ## Asset housekeeping gotchas
 
 - `DuplicateLensStudioAsset` → key is `assetUUID` (not `assetId`).
